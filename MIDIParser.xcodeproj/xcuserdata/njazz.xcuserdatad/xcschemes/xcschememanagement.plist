@@ -7,12 +7,12 @@
 		<key>MIDIParser-iOS.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>0</integer>
+			<integer>34</integer>
 		</dict>
 		<key>MIDIParser-macOS.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
-			<integer>1</integer>
+			<integer>35</integer>
 		</dict>
 		<key>Tests-macOS.xcscheme</key>
 		<dict>

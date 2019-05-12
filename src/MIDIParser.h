@@ -208,32 +208,32 @@ inline static void PrintMIDIMessage(MIDIMessage msg)
 
 // -------------------- Raw Data --------------------
 
-typedef struct MIDIRawData {
+typedef struct MIDIRawBytes {
     MIDIByte* data;
     int size;
-} MIDIRawData;
+} MIDIRawBytes;
 
-inline static struct MIDIRawData newRawData(int size)
+inline static struct MIDIRawBytes newRawData(int size)
 {
-    MIDIRawData ret;
+    MIDIRawBytes ret;
     ret.size = size;
-    ret.data = malloc(sizeof(MIDIByte) * size);
+    ret.data = (MIDIByte*)malloc(sizeof(MIDIByte) * size);
     return ret;
 }
 
-inline static struct MIDIRawData EmptyMIDIRawData()
+inline static struct MIDIRawBytes EmptyMIDIRawBytes()
 {
     return newRawData(0);
 }
 
-inline static int MIDIRawDataIsEmpty(MIDIRawData d)
+inline static int MIDIRawBytesIsEmpty(MIDIRawBytes d)
 {
     return d.size == 0;
 }
 
-inline static void PrintMIDIRawData(MIDIRawData d)
+inline static void PrintMIDIRawBytes(MIDIRawBytes d)
 {
-    printf("MIDIRawData: [size: %i] ", d.size);
+    printf("MIDIRawBytes: [size: %i] ", d.size);
     for (int i = 0; i < d.size; i++) {
         printf("%i ", d.data[i]);
     }
@@ -352,14 +352,14 @@ inline static MIDIMessage MIDIDecode(MIDIByte* data, int len)
     return EmptyMIDIMessage();
 }
 
-inline static MIDIRawData MIDIEncode(MIDIMessage msg)
+inline static MIDIRawBytes MIDIEncode(MIDIMessage msg)
 {
     if (msg.type == mtNothing) {
         return newRawData(0);
     }
 
     if (msg.type == mtNote) {
-        MIDIRawData ret = newRawData(3);
+        MIDIRawBytes ret = newRawData(3);
         ret.data[0] = 144 + msg.value.note.channel;
         ret.data[1] = msg.value.note.pitch;
         ret.data[2] = msg.value.note.velocity;
@@ -367,7 +367,7 @@ inline static MIDIRawData MIDIEncode(MIDIMessage msg)
     }
 
     if (msg.type == mtPolyKeyPressure) {
-        MIDIRawData ret = newRawData(3);
+        MIDIRawBytes ret = newRawData(3);
         ret.data[0] = 160 + msg.value.keyPressure.channel;
         ret.data[1] = msg.value.keyPressure.key;
         ret.data[2] = msg.value.keyPressure.value;
@@ -375,7 +375,7 @@ inline static MIDIRawData MIDIEncode(MIDIMessage msg)
     }
 
     if (msg.type == mtControlChange) {
-        MIDIRawData ret = newRawData(3);
+        MIDIRawBytes ret = newRawData(3);
         ret.data[0] = 176 + msg.value.controlChange.channel;
         ret.data[1] = msg.value.controlChange.cc;
         ret.data[2] = msg.value.controlChange.value;
@@ -383,26 +383,26 @@ inline static MIDIRawData MIDIEncode(MIDIMessage msg)
     }
 
     if (msg.type == mtProgramChange) {
-        MIDIRawData ret = newRawData(2);
+        MIDIRawBytes ret = newRawData(2);
         ret.data[0] = 192 + msg.value.programChange.channel;
         ret.data[1] = msg.value.programChange.value;
         return ret;
     }
 
     if (msg.type == mtAfterTouch) {
-        MIDIRawData ret = newRawData(2);
+        MIDIRawBytes ret = newRawData(2);
         ret.data[0] = 208 + msg.value.afterTouch.channel;
         ret.data[1] = msg.value.afterTouch.value;
         return ret;
     }
 
     if (msg.type == mtPitchBend) {
-        MIDIRawData ret = newRawData(3);
+        MIDIRawBytes ret = newRawData(3);
         ret.data[0] = 224 + msg.value.pitchBend.channel;
         ret.data[1] = msg.value.pitchBend.value % 127;
         ret.data[2] = floor(msg.value.pitchBend.value / 127);
         return ret;
     }
 
-    return EmptyMIDIRawData();
+    return EmptyMIDIRawBytes();
 };
