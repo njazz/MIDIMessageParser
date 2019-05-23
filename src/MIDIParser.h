@@ -136,6 +136,7 @@ inline static void PrintMIDIPitchBend(struct MIDIPitchBend n)
 enum MIDIMessageType {
     mtNothing = 0,
     mtNote,
+    mtNoteOff,
     mtControlChange,
     mtPolyKeyPressure,
     mtProgramChange,
@@ -150,6 +151,7 @@ union MIDIMessageUnion {
     struct MIDIProgramChange programChange;
     struct MIDIAfterTouch afterTouch;
     struct MIDIPitchBend pitchBend;
+    long hash;
 };
 
 // -------------------- Message --------------------
@@ -180,6 +182,10 @@ inline static void PrintMIDIMessage(MIDIMessage msg)
     }
 
     if (msg.type == mtNote) {
+        PrintMIDINote(msg.value.note);
+    }
+    
+    if (msg.type == mtNoteOff) {
         PrintMIDINote(msg.value.note);
     }
 
@@ -252,6 +258,16 @@ inline static MIDIMessage CreateMIDINoteMessage(MIDIByte ch, MIDIByte p, MIDIByt
     return ret;
 }
 
+inline static MIDIMessage CreateMIDINoteOffMessage(MIDIByte ch, MIDIByte p, MIDIByte v)
+{
+    MIDIMessage ret;
+    ret.type = mtNoteOff;
+    ret.value.note.channel = ch;
+    ret.value.note.pitch = p;
+    ret.value.note.velocity = v;
+    return ret;
+}
+
 inline static MIDIMessage CreateMIDIControlChangeMessage(MIDIByte ch, MIDIByte cc, MIDIByte v)
 {
     MIDIMessage ret;
@@ -311,6 +327,14 @@ inline static MIDIMessage MIDIDecode(MIDIByte* data, int len)
         ret.value.note.channel = data[0] - 144;
         return ret;
     }
+    
+    if (MIDIByteInRange(data[0], 128, 143)) {
+        ret.type = mtNoteOff;
+        ret.value.note.pitch = data[1];
+        ret.value.note.velocity = data[2];
+        ret.value.note.channel = data[0] - 128;
+        return ret;
+    }
 
     if (MIDIByteInRange(data[0], 160, 175)) {
         ret.type = mtPolyKeyPressure;
@@ -361,6 +385,14 @@ inline static MIDIRawBytes MIDIEncode(MIDIMessage msg)
     if (msg.type == mtNote) {
         MIDIRawBytes ret = newRawData(3);
         ret.data[0] = 144 + msg.value.note.channel;
+        ret.data[1] = msg.value.note.pitch;
+        ret.data[2] = msg.value.note.velocity;
+        return ret;
+    }
+    
+    if (msg.type == mtNoteOff) {
+        MIDIRawBytes ret = newRawData(3);
+        ret.data[0] = 128 + msg.value.note.channel;
         ret.data[1] = msg.value.note.pitch;
         ret.data[2] = msg.value.note.velocity;
         return ret;
