@@ -151,7 +151,6 @@ union MIDIMessageUnion {
     struct MIDIProgramChange programChange;
     struct MIDIAfterTouch afterTouch;
     struct MIDIPitchBend pitchBend;
-    long hash;
 };
 
 // -------------------- Message --------------------
@@ -320,56 +319,56 @@ inline static MIDIMessage CreateMIDIPitchBendMessage(MIDIByte ch, unsigned int v
 inline static MIDIMessage MIDIDecode(MIDIByte* data, int len)
 {
     MIDIMessage ret;
-    if (MIDIByteInRange(data[0], 144, 159)) {
+    if (MIDIByteInRange(data[0], 144, 160)) {
         ret.type = mtNote;
         ret.value.note.pitch = data[1];
         ret.value.note.velocity = data[2];
-        ret.value.note.channel = data[0] - 144;
+        ret.value.note.channel = data[0] - 144 + 1;
         return ret;
     }
     
-    if (MIDIByteInRange(data[0], 128, 143)) {
+    if (MIDIByteInRange(data[0], 128, 144)) {
         ret.type = mtNoteOff;
         ret.value.note.pitch = data[1];
         ret.value.note.velocity = data[2];
-        ret.value.note.channel = data[0] - 128;
+        ret.value.note.channel = data[0] - 128 + 1;
         return ret;
     }
 
-    if (MIDIByteInRange(data[0], 160, 175)) {
+    if (MIDIByteInRange(data[0], 160, 176)) {
         ret.type = mtPolyKeyPressure;
         ret.value.keyPressure.key = data[1];
         ret.value.keyPressure.value = data[2];
-        ret.value.keyPressure.channel = data[0] - 160;
+        ret.value.keyPressure.channel = data[0] - 160 + 1;
         return ret;
     }
 
-    if (MIDIByteInRange(data[0], 176, 191)) {
+    if (MIDIByteInRange(data[0], 176, 192)) {
         ret.type = mtControlChange;
         ret.value.controlChange.cc = data[1];
         ret.value.controlChange.value = data[2];
-        ret.value.controlChange.channel = data[0] - 176;
+        ret.value.controlChange.channel = data[0] - 176 + 1;
         return ret;
     }
 
-    if (MIDIByteInRange(data[0], 192, 207)) {
+    if (MIDIByteInRange(data[0], 192, 208)) {
         ret.type = mtProgramChange;
         ret.value.programChange.value = data[1];
-        ret.value.controlChange.channel = data[0] - 192;
+        ret.value.programChange.channel = data[0] - 192 + 1;
         return ret;
     }
 
-    if (MIDIByteInRange(data[0], 208, 223)) {
+    if (MIDIByteInRange(data[0], 208, 224)) {
         ret.type = mtAfterTouch;
-        ret.value.programChange.value = data[1];
-        ret.value.controlChange.channel = data[0] - 208;
+        ret.value.afterTouch.value = data[1];
+        ret.value.afterTouch.channel = data[0] - 208 + 1;
         return ret;
     }
 
-    if (MIDIByteInRange(data[0], 224, 239)) {
+    if (MIDIByteInRange(data[0], 224, 240)) {
         ret.type = mtPitchBend;
-        ret.value.programChange.value = data[1] + data[2] * 127;
-        ret.value.controlChange.channel = data[0] - 224;
+        ret.value.pitchBend.value = data[1] + data[2] * 127;
+        ret.value.pitchBend.channel = data[0] - 224 + 1;
         return ret;
     }
 
@@ -384,7 +383,7 @@ inline static MIDIRawBytes MIDIEncode(MIDIMessage msg)
 
     if (msg.type == mtNote) {
         MIDIRawBytes ret = newRawData(3);
-        ret.data[0] = 144 + msg.value.note.channel;
+        ret.data[0] = 144 + msg.value.note.channel - 1;
         ret.data[1] = msg.value.note.pitch;
         ret.data[2] = msg.value.note.velocity;
         return ret;
@@ -392,7 +391,7 @@ inline static MIDIRawBytes MIDIEncode(MIDIMessage msg)
     
     if (msg.type == mtNoteOff) {
         MIDIRawBytes ret = newRawData(3);
-        ret.data[0] = 128 + msg.value.note.channel;
+        ret.data[0] = 128 + msg.value.note.channel - 1;
         ret.data[1] = msg.value.note.pitch;
         ret.data[2] = msg.value.note.velocity;
         return ret;
@@ -400,7 +399,7 @@ inline static MIDIRawBytes MIDIEncode(MIDIMessage msg)
 
     if (msg.type == mtPolyKeyPressure) {
         MIDIRawBytes ret = newRawData(3);
-        ret.data[0] = 160 + msg.value.keyPressure.channel;
+        ret.data[0] = 160 + msg.value.keyPressure.channel - 1;
         ret.data[1] = msg.value.keyPressure.key;
         ret.data[2] = msg.value.keyPressure.value;
         return ret;
@@ -408,7 +407,7 @@ inline static MIDIRawBytes MIDIEncode(MIDIMessage msg)
 
     if (msg.type == mtControlChange) {
         MIDIRawBytes ret = newRawData(3);
-        ret.data[0] = 176 + msg.value.controlChange.channel;
+        ret.data[0] = 176 + msg.value.controlChange.channel - 1;
         ret.data[1] = msg.value.controlChange.cc;
         ret.data[2] = msg.value.controlChange.value;
         return ret;
@@ -416,21 +415,21 @@ inline static MIDIRawBytes MIDIEncode(MIDIMessage msg)
 
     if (msg.type == mtProgramChange) {
         MIDIRawBytes ret = newRawData(2);
-        ret.data[0] = 192 + msg.value.programChange.channel;
+        ret.data[0] = 192 + msg.value.programChange.channel - 1;
         ret.data[1] = msg.value.programChange.value;
         return ret;
     }
 
     if (msg.type == mtAfterTouch) {
         MIDIRawBytes ret = newRawData(2);
-        ret.data[0] = 208 + msg.value.afterTouch.channel;
+        ret.data[0] = 208 + msg.value.afterTouch.channel - 1;
         ret.data[1] = msg.value.afterTouch.value;
         return ret;
     }
 
     if (msg.type == mtPitchBend) {
         MIDIRawBytes ret = newRawData(3);
-        ret.data[0] = 224 + msg.value.pitchBend.channel;
+        ret.data[0] = 224 + msg.value.pitchBend.channel - 1;
         ret.data[1] = msg.value.pitchBend.value % 127;
         ret.data[2] = floor(msg.value.pitchBend.value / 127);
         return ret;
