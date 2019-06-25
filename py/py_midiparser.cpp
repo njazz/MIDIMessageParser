@@ -53,45 +53,28 @@ PYBIND11_MODULE(py_midiparser, m)
 
     py::class_<MIDIMessageUnion>(m, "MIDIMessageUnion")
         .def_property("note",
-            [](MIDIMessageUnion& u)->MIDINote& { return u.note; },
+            [](MIDIMessageUnion& u) -> MIDINote& { return u.note; },
             [](MIDIMessageUnion& u, MIDINote n) { u.note = n; })
 
         .def_property("key_pressure",
-            [](MIDIMessageUnion& u)->MIDIPolyKeyPressure& { return u.keyPressure; },
+            [](MIDIMessageUnion& u) -> MIDIPolyKeyPressure& { return u.keyPressure; },
             [](MIDIMessageUnion& u, MIDIPolyKeyPressure n) { u.keyPressure = n; })
 
         .def_property("control_change",
-            [](MIDIMessageUnion& u)->MIDIControlChange& { return u.controlChange; },
+            [](MIDIMessageUnion& u) -> MIDIControlChange& { return u.controlChange; },
             [](MIDIMessageUnion& u, MIDIControlChange n) { u.controlChange = n; })
 
         .def_property("program_change",
-            [](MIDIMessageUnion& u)->MIDIProgramChange& { return u.programChange; },
+            [](MIDIMessageUnion& u) -> MIDIProgramChange& { return u.programChange; },
             [](MIDIMessageUnion& u, MIDIProgramChange n) { u.programChange = n; })
 
         .def_property("aftertouch",
-            [](MIDIMessageUnion& u)->MIDIAfterTouch& { return u.afterTouch; },
+            [](MIDIMessageUnion& u) -> MIDIAfterTouch& { return u.afterTouch; },
             [](MIDIMessageUnion& u, MIDIAfterTouch n) { u.afterTouch = n; })
 
         .def_property("pitch_bend",
-            [](MIDIMessageUnion& u)->MIDIPitchBend& { return u.pitchBend; },
+            [](MIDIMessageUnion& u) -> MIDIPitchBend& { return u.pitchBend; },
             [](MIDIMessageUnion& u, MIDIPitchBend n) { u.pitchBend = n; })
-
-        // .def_property("hash",
-        //     [](MIDIMessageUnion& u)->long& { return u.hash; },
-        //     [](MIDIMessageUnion& u, long n) { u.hash = n; })
-
-        // .def_property("bytes",
-        //     [](const MIDIMessageUnion& u) {
-        //         std::array<MIDIByte, 4> ret;
-        //         for (int i = 0; i < 4; i++)
-        //             ret[i] = u.bytes[i];
-        //         return ret;
-        //     },
-        //     [](MIDIMessageUnion& u, std::array<MIDIByte, 4> n) {
-        //
-        //         for (int i = 0; i < 4; i++)
-        //             u.bytes[i] = n[i];
-        //     });
 
         ;
 
